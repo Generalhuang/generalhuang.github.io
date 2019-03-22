@@ -1,0 +1,32 @@
+function configCI
+{
+    SDK=$compileEnv
+    XCODE_PATH=$XCODE_PATH$compileEnv
+
+}
+
+function configLocal
+{
+    SDK=iphoneos
+    XCODE_PATH=xcodebuild
+    export BUILD_LOCAL_FLAG=1
+    export WORKSPACE=/Users/michaelgeng/Documents/UISVNnew/howling
+    export MajorVersion=1
+    export MinorVersion=0
+    export FixVersion=0
+    export SVN_REVISION=1
+    echo ${WORKSPACE}
+}
+
+if [ -z $CI ];then
+configLocal
+else
+configCI
+fi
+
+
+#!/bin/sh
+PROG_DIR=$(cd "$(dirname "$0")"; pwd -P)
+PROG_NAME=$(basename "$0")
+
+python -u $PROG_DIR/main.py ios
