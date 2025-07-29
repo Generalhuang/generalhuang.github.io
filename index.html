@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
@@ -12,4 +12,138 @@
      <script src="scripts/main.js" ></script>
 
   </body>
+</html>
+ -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC 音频处理状态</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            color: #0056b3;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #output {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+            min-height: 80px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #output p {
+            margin: 5px 0;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+        .status-true {
+            color: green;
+            font-weight: bold;
+        }
+        .status-false {
+            color: red;
+            font-weight: bold;
+        }
+        .status-unknown {
+            color: orange;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebRTC 音频处理状态检查</h1>
+    <button id="getAudio">获取音频流并检查状态</button>
+    <div id="output">
+        <!-- 状态将显示在这里 -->
+        <p>点击按钮获取音频流并检查 AGC, AEC, NS 状态...</p>
+    </div>
+
+    <script>
+        // JavaScript 代码开始
+        document.getElementById('getAudio').addEventListener('click', () => {
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = '<p>正在尝试获取音频流...</p>'; // 清除之前的输出
+
+            // 请求音频流，这里我们不指定任何约束，让浏览器使用默认值
+            // 如果你想测试禁用某个功能，可以这样写：
+            // { audio: { autoGainControl: false, echoCancellation: false, noiseSuppression: false } }
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    // 获取音频轨道
+                    const audioTrack = stream.getAudioTracks()[0];
+
+                    // 获取音频轨道的设置
+                    const settings = audioTrack.getSettings();
+
+                    // 获取各个状态的值
+                    const agcStatus = settings.autoGainControl;
+                    const aecStatus = settings.echoCancellation;
+                    const nsStatus = settings.noiseSuppression;
+
+                    // 构建要显示的消息
+                    let outputHTML = '<h2>当前音频处理状态:</h2>';
+
+                    // 辅助函数，根据布尔值返回带有颜色的HTML字符串
+                    const getStatusHtml = (label, status) => {
+                        let className = 'status-unknown';
+                        let displayStatus = '未知';
+
+                        if (typeof status === 'boolean') {
+                            className = status ? 'status-true' : 'status-false';
+                            displayStatus = status ? '已启用 (True)' : '已禁用 (False)';
+                        } else if (status === undefined) {
+                            displayStatus = '未报告 (可能不支持或未启用)';
+                        } else {
+                            displayStatus = String(status); // 转换为字符串以防万一
+                        }
+                        return `<p>${label}: <span class="${className}">${displayStatus}</span></p>`;
+                    };
+
+                    outputHTML += getStatusHtml('自动增益控制 (AGC)', agcStatus);
+                    outputHTML += getStatusHtml('回声消除 (AEC)', aecStatus);
+                    outputHTML += getStatusHtml('噪声抑制 (NS)', nsStatus);
+
+                    // 将消息显示在 HTML 页面上
+                    outputDiv.innerHTML = outputHTML;
+
+                    // 也可以在控制台打印一份，方便调试
+                    console.log('WebRTC Audio Processing Status:');
+                    console.log('  Auto Gain Control (AGC):', agcStatus);
+                    console.log('  Echo Cancellation (AEC):', aecStatus);
+                    console.log('  Noise Suppression (NS):', nsStatus);
+
+                    // 重要：获取完设置后，通常需要停止媒体流，除非你打算继续使用它
+                    // 否则麦克风会一直处于激活状态，并可能显示麦克风使用图标
+                    stream.getTracks().forEach(track => track.stop());
+                })
+                .catch(error => {
+                    // 处理错误，例如用户拒绝了麦克风权限
+                    outputDiv.innerHTML = `<p style="color: red;">错误: ${error.name} - ${error.message}</p>`;
+                    console.error('获取音频流时出错:', error);
+                });
+        });
+        // JavaScript 代码结束
+    </script>
+</body>
 </html>
