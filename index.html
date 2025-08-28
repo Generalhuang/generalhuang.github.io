@@ -78,7 +78,9 @@
         <!-- 状态将显示在这里 -->
         <p>点击按钮获取音频流并检查 AGC, AEC, NS 状态...</p>
     </div>
-
+    <audio  id="myAudio" controls crossorigin="anonymous">
+          <source src="output2.aac" type="audio/mpeg">
+    </audio>
     <script>
         // JavaScript 代码开始
         document.getElementById('getAudio').addEventListener('click', () => {
