@@ -1,6 +1,7 @@
 {
     "blacklist": {
-        "2A5F_2105": "USB A Device",
+        "2A5F_2105": "小爱音箱",
         "1234_5678": "USB B Device"
     }
+
 }
